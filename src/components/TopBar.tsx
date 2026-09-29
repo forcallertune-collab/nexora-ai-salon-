@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, ShieldCheck, FileText, Compass, LayoutGrid, GitBranch, Sparkles, Layout, Clock, UserCheck, LayoutDashboard, SlidersHorizontal, ShieldAlert, Cpu, Palette, Route, Boxes, Globe, Lock, Sliders } from 'lucide-react';
+import { Layers, ShieldCheck, FileText, Compass, LayoutGrid, GitBranch, Sparkles, Layout, Clock, UserCheck, LayoutDashboard, SlidersHorizontal, ShieldAlert, Cpu, Palette, Route, Boxes, Globe, Lock, Sliders, CalendarCheck2, Scissors, CalendarRange, Clock3, UserCheck2, CreditCard, Bell, Users, History } from 'lucide-react';
 
 interface TopBarProps {
   activeTab: string;
@@ -13,15 +13,23 @@ export const TopBar: React.FC<TopBarProps> = ({
   setActiveTab,
 }) => {
   const navItems = [
+    { id: 'phase54-staff-availability', label: 'Phase 5.4: Staff Availability & Leave', icon: CalendarRange },
+    { id: 'phase53-staff-management', label: 'Phase 5.3: Business Staff Management', icon: Users },
+    { id: 'phase52-customer-profile', label: 'Phase 5.2: Customer Profile & History', icon: History },
+    { id: 'phase51-customer-crm', label: 'Phase 5.1: Customer Management / CRM', icon: Users },
+    { id: 'phase49-booking-hardening', label: 'Phase 4.9: Booking Hardening & Testing', icon: ShieldCheck },
+    { id: 'phase48-business-management', label: 'Phase 4.8: Business Management & Calendar', icon: LayoutDashboard },
+    { id: 'phase47-booking-notifications', label: 'Phase 4.7: Confirmation & Notifications', icon: Bell },
+    { id: 'phase46-advance-payment', label: 'Phase 4.6: Advance Payment', icon: CreditCard },
+    { id: 'phase45-customer-booking', label: 'Phase 4.5: Customer Booking Flow', icon: UserCheck2 },
+    { id: 'phase44-slot-engine', label: 'Phase 4.4: Slot Engine', icon: Clock3 },
+    { id: 'phase43-staff-schedule', label: 'Phase 4.3: Staff Availability', icon: CalendarRange },
+    { id: 'phase42-services-packages', label: 'Phase 4.2: Services & Packages', icon: Scissors },
+    { id: 'phase41-booking-state-machine', label: 'Phase 4.1: Booking State Machine', icon: CalendarCheck2 },
     { id: 'phase38-website-builder', label: 'Phase 3.8: Website Builder', icon: Sliders },
     { id: 'phase37-onboarding', label: 'Phase 3.7: Onboarding', icon: Sparkles },
     { id: 'phase36-auth-foundation', label: 'Phase 3.6: Authentication', icon: Lock },
     { id: 'phase35-public-website', label: 'Phase 3.5: Public Website', icon: Globe },
-    { id: 'phase34-category-engine', label: 'Phase 3.4: Category Engine', icon: Boxes },
-    { id: 'phase33-shells', label: 'Phase 3.3: Shells & Routing', icon: Route },
-    { id: 'phase32-design-system', label: 'Phase 3.2: Design System', icon: Palette },
-    { id: 'phase31-foundation', label: 'Phase 3.1: Project Foundation', icon: Cpu },
-    { id: 'phase28-superadmin', label: 'Phase 2.8: Super Admin', icon: ShieldAlert },
   ];
 
   return (

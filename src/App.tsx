@@ -1,6 +1,19 @@
 import React, { useState } from 'react';
 import { TopBar } from './components/TopBar';
 import { AuthProvider } from './services/authContext';
+import { Phase54StaffAvailabilityShowcase } from './components/Phase54StaffAvailabilityShowcase';
+import { Phase53StaffManagementShowcase } from './components/Phase53StaffManagementShowcase';
+import { Phase52CustomerProfileHistoryShowcase } from './components/Phase52CustomerProfileHistoryShowcase';
+import { Phase51CustomerCrmShowcase } from './components/Phase51CustomerCrmShowcase';
+import { Phase49BookingHardeningShowcase } from './components/Phase49BookingHardeningShowcase';
+import { Phase48BusinessBookingShowcase } from './components/Phase48BusinessBookingShowcase';
+import { Phase47BookingNotificationShowcase } from './components/Phase47BookingNotificationShowcase';
+import { Phase46AdvancePaymentShowcase } from './components/Phase46AdvancePaymentShowcase';
+import { Phase45CustomerBookingShowcase } from './components/Phase45CustomerBookingShowcase';
+import { Phase44AvailabilitySlotEngineShowcase } from './components/Phase44AvailabilitySlotEngineShowcase';
+import { Phase43StaffScheduleShowcase } from './components/Phase43StaffScheduleShowcase';
+import { Phase42ServicesPackagesShowcase } from './components/Phase42ServicesPackagesShowcase';
+import { Phase41BookingStateMachineShowcase } from './components/Phase41BookingStateMachineShowcase';
 import { Phase38WebsiteBuilderShowcase } from './components/Phase38WebsiteBuilderShowcase';
 import { Phase37OnboardingShowcase } from './components/Phase37OnboardingShowcase';
 import { Phase36AuthFoundationShowcase } from './components/Phase36AuthFoundationShowcase';
@@ -28,10 +41,10 @@ import { RoleMatrixView } from './components/RoleMatrixView';
 import { CategoryEngineView } from './components/CategoryEngineView';
 import { UserFlowsView } from './components/UserFlowsView';
 import { ArchitectureDocumentSummary } from './components/ArchitectureDocumentSummary';
-import { LayoutGrid, Layers, ShieldCheck, Compass, FileText, BookOpen, Sparkles, Layout, Clock, UserCheck, LayoutDashboard, SlidersHorizontal, ShieldAlert, Cpu, Palette, Route, Boxes, Globe, Lock, Sliders } from 'lucide-react';
+import { LayoutGrid, Layers, ShieldCheck, Compass, FileText, BookOpen, Sparkles, Layout, Clock, UserCheck, LayoutDashboard, SlidersHorizontal, ShieldAlert, Cpu, Palette, Route, Boxes, Globe, Lock, Sliders, CalendarCheck2, Scissors, CalendarRange, Clock3 } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<string>('phase38-website-builder');
+  const [activeTab, setActiveTab] = useState<string>('phase54-staff-availability');
   const [wireframeCategory, setWireframeCategory] = useState<string>('barber');
 
   return (
@@ -45,27 +58,40 @@ export default function App() {
           setWireframeCategory={setWireframeCategory}
         />
 
-        {/* Phase 3.8 Status Banner */}
+        {/* Phase 5.4 Status Banner */}
         <div className="bg-slate-950 text-white text-xs border-b border-slate-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="font-semibold tracking-wide uppercase text-[11px] text-emerald-300">
-                Strict Execution Mode: Phase 3.8 — Website Builder Foundation
+                Strict Execution Mode: Phase 5.4 — Staff Availability & Leave Management UI
               </span>
               <span className="text-slate-400">·</span>
               <span className="text-slate-300">
-                Visual 3-Pane Workbench (Pages/Sections · Live Same-Component Canvas · Properties Inspector) · Reordering · Storage Persistence
+                Weekly Schedules · Multi-Breaks · Full & Partial Leaves · Business Holidays · Live Evaluator Preview
               </span>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-emerald-400 font-mono font-bold">
-              <span>PHASE 3.8 COMPLETE — PHASE 3 FOUNDATION FINISHED</span>
+              <span>PHASE 5.4 COMPLETE</span>
             </div>
           </div>
         </div>
 
         {/* Main Content Area */}
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {activeTab === 'phase54-staff-availability' && <Phase54StaffAvailabilityShowcase />}
+          {activeTab === 'phase53-staff-management' && <Phase53StaffManagementShowcase />}
+          {activeTab === 'phase52-customer-profile' && <Phase52CustomerProfileHistoryShowcase />}
+          {activeTab === 'phase51-customer-crm' && <Phase51CustomerCrmShowcase />}
+          {activeTab === 'phase49-booking-hardening' && <Phase49BookingHardeningShowcase />}
+          {activeTab === 'phase48-business-management' && <Phase48BusinessBookingShowcase />}
+          {activeTab === 'phase47-booking-notifications' && <Phase47BookingNotificationShowcase />}
+          {activeTab === 'phase46-advance-payment' && <Phase46AdvancePaymentShowcase />}
+          {activeTab === 'phase45-customer-booking' && <Phase45CustomerBookingShowcase />}
+          {activeTab === 'phase44-slot-engine' && <Phase44AvailabilitySlotEngineShowcase />}
+          {activeTab === 'phase43-staff-schedule' && <Phase43StaffScheduleShowcase />}
+          {activeTab === 'phase42-services-packages' && <Phase42ServicesPackagesShowcase />}
+          {activeTab === 'phase41-booking-state-machine' && <Phase41BookingStateMachineShowcase />}
           {activeTab === 'phase38-website-builder' && <Phase38WebsiteBuilderShowcase />}
           {activeTab === 'phase37-onboarding' && <Phase37OnboardingShowcase />}
           {activeTab === 'phase36-auth-foundation' && <Phase36AuthFoundationShowcase />}
