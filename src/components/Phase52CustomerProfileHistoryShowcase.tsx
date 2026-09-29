@@ -346,7 +346,7 @@ export const Phase52CustomerProfileHistoryShowcase: React.FC = () => {
             <span className="text-[10px] text-blue-800 font-bold uppercase block">Next Upcoming</span>
             {summaryMetrics?.upcomingBooking ? (
               <div className="text-[11px] font-bold text-blue-900 mt-0.5">
-                {summaryMetrics.upcomingBooking.date} @ {summaryMetrics.upcomingBooking.time}
+                {(summaryMetrics.upcomingBooking as any).date} @ {(summaryMetrics.upcomingBooking as any).time}
               </div>
             ) : (
               <span className="text-xs text-slate-400 italic block mt-1">No upcoming booking</span>
@@ -476,7 +476,7 @@ export const Phase52CustomerProfileHistoryShowcase: React.FC = () => {
               {customer.notes.length === 0 ? (
                 <div className="text-slate-400 italic text-center py-4 text-xs">No notes recorded yet.</div>
               ) : (
-                customer.notes.map((n) => (
+                customer.notes.map((n: any) => (
                   <div key={n.id} className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1 text-xs">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="font-bold text-slate-800">{n.authorName} ({n.authorRole})</span>

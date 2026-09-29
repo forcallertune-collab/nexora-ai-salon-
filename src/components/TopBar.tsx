@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, ShieldCheck, FileText, Compass, LayoutGrid, GitBranch, Sparkles, Layout, Clock, UserCheck, LayoutDashboard, SlidersHorizontal, ShieldAlert, Cpu, Palette, Route, Boxes, Globe, Lock, Sliders, CalendarCheck2, Scissors, CalendarRange, Clock3, UserCheck2, CreditCard, Bell, Users, History, Star } from 'lucide-react';
+import { Layers, ShieldCheck, FileText, Compass, LayoutGrid, GitBranch, Sparkles, Layout, Clock, UserCheck, LayoutDashboard, SlidersHorizontal, ShieldAlert, Cpu, Palette, Route, Boxes, Globe, Lock, Sliders, CalendarCheck2, Scissors, CalendarRange, Clock3, UserCheck2, CreditCard, Bell, Users, History, Star, QrCode, Percent, Wallet, TrendingUp, Shield } from 'lucide-react';
 
 interface TopBarProps {
   activeTab: string;
@@ -13,6 +13,18 @@ export const TopBar: React.FC<TopBarProps> = ({
   setActiveTab,
 }) => {
   const navItems = [
+    { id: 'phase612-hardening', label: 'Phase 6.12: Hardening & Testing', icon: Shield },
+    { id: 'phase611-ai-growth', label: 'Phase 6.11: AI Growth & Analytics', icon: TrendingUp },
+    { id: 'phase610-automations', label: 'Phase 6.10: Re-Engagement Automations', icon: Cpu },
+    { id: 'phase69-offers', label: 'Phase 6.9: One-Click Offers', icon: Sparkles },
+    { id: 'phase68-crm', label: 'Phase 6.8: Customer Growth CRM', icon: Users },
+    { id: 'phase67-rewards', label: 'Phase 6.7: Network Directory & Milestone Rewards', icon: Compass },
+    { id: 'phase66-wallet', label: 'Phase 6.6: Business Wallet & Ledger', icon: Wallet },
+    { id: 'phase65-withdrawal', label: 'Phase 6.5: Daily Withdrawal Engine', icon: Clock },
+    { id: 'phase64-ledger', label: 'Phase 6.4: Commission & Ledger', icon: Percent },
+    { id: 'phase63-split', label: 'Phase 6.3: Collection Split Engine', icon: Percent },
+    { id: 'phase62-nexora-qr', label: 'Phase 6.2: Nexora QR Collection', icon: QrCode },
+    { id: 'phase61-payment', label: 'Phase 6.1: Payment & Transactions', icon: CreditCard },
     { id: 'phase510-security', label: 'Phase 5.10: Security & Deliverables Report', icon: ShieldCheck },
     { id: 'phase59-operational-dashboard', label: 'Phase 5.9: Business Operational Dashboard', icon: LayoutDashboard },
     { id: 'phase58-communication', label: 'Phase 5.8: Customer Communication', icon: Bell },

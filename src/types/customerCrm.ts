@@ -1,148 +1,107 @@
-// Nexora SalonOS — Phase 5.1 Customer Management / CRM Types & Domain Logic
-// Multi-Tenant Isolated Customer Profiles, Authoritative Metrics, Notes & Tags
+// Nexora SalonOS — Complete Unified Customer Growth CRM Types (Phase 6.8 & Legacy Compat)
 
-export type CustomerStatus = 'NEW' | 'ACTIVE' | 'INACTIVE';
+export type CrmSegmentType =
+  | 'NEW'
+  | 'RETURNING'
+  | 'VIP'
+  | 'INACTIVE'
+  | 'BIRTHDAY_MONTH'
+  | 'DUE_FOR_VISIT'
+  | 'HIGH_SPENDING'
+  | 'FREQUENT';
 
-export type CustomerTimelineEventType =
-  | 'CUSTOMER_CREATED'
-  | 'BOOKING_CREATED'
-  | 'BOOKING_CONFIRMED'
-  | 'VISIT_COMPLETED'
-  | 'BOOKING_CANCELLED'
-  | 'REVIEW_SUBMITTED';
-
-export interface CustomerTimelineEvent {
-  id: string;
-  customerId: string;
-  businessId: string;
-  type: CustomerTimelineEventType;
-  title: string;
-  description: string;
-  timestamp: string; // ISO string
-  bookingId?: string;
-  metadata?: Record<string, any>;
-}
-
-export interface CustomerSummaryMetrics {
-  totalBookings: number;
-  completedBookings: number;
-  cancelledBookings: number;
-  noShowBookings: number;
-  totalSpend: number; // INR
-  lastVisitAt?: string;
-  upcomingBooking?: {
-    id: string;
-    date: string;
-    time: string;
-    serviceName: string;
-    staffName: string;
-  };
-}
-
-export interface CustomerNote {
-  id: string;
-  customerId: string;
-  businessId: string;
-  content: string;
-  authorName: string;
-  authorRole: string; // e.g., 'ADMIN', 'MANAGER', 'STAFF'
-  createdAt: string; // ISO string
-}
-
-export interface CustomerProfile {
-  id: string;
-  userId?: string; // Optional linkage to auth account
-  businessId: string;
-  name: string;
-  phone: string;
-  email: string;
-  avatar?: string;
-  dateOfBirth?: string; // YYYY-MM-DD
-  gender?: string;
-  notes: CustomerNote[];
-  tags: string[]; // e.g. ['VIP', 'Regular', 'Hair', 'Bridal']
-  marketingConsent: boolean;
-  status: CustomerStatus;
-  createdAt: string;
-  updatedAt: string;
-  lastVisitAt?: string;
-  totalBookings: number;
-  completedBookings: number;
-  cancelledBookings: number;
-  totalSpend: number; // in standard currency units (e.g. INR 3500)
-}
-
-export interface CreateCustomerDTO {
-  businessId: string;
-  name: string;
-  phone: string;
-  email: string;
-  dateOfBirth?: string;
-  gender?: string;
-  tags?: string[];
-  marketingConsent?: boolean;
-  initialNote?: string;
-  userId?: string;
-}
-
-export interface UpdateCustomerDTO {
-  name?: string;
-  phone?: string;
-  email?: string;
-  dateOfBirth?: string;
-  gender?: string;
-  marketingConsent?: boolean;
-}
+export type CustomerStatus = 'NEW' | 'ACTIVE' | 'INACTIVE' | 'VIP';
 
 export interface CustomerFilterParams {
-  searchQuery?: string; // Search name, phone, email, or booking ID
-  status?: 'ALL' | CustomerStatus;
-  customerType?: 'ALL' | 'NEW' | 'RETURNING';
+  searchQuery?: string;
   tag?: string;
-  startDate?: string; // YYYY-MM-DD
-  endDate?: string; // YYYY-MM-DD
+  status?: string;
+  customerType?: string;
 }
 
 export interface DuplicateDetectionResult {
   isPotentialDuplicate: boolean;
-  existingCustomerId?: string;
-  existingCustomerName?: string;
-  matchReason?: string; // e.g. 'Matching phone number in business records'
+  matchReason?: string;
 }
 
-/**
- * Centrally documented business rules for calculating Customer Status:
- * - NEW: Created within the last 30 days OR has <= 1 booking
- * - ACTIVE: Has at least 1 completed booking within the last 90 days
- * - INACTIVE: Last visit was > 90 days ago OR 0 completed bookings
- */
-export function calculateCustomerStatus(
-  customer: Pick<CustomerProfile, 'createdAt' | 'lastVisitAt' | 'totalBookings' | 'completedBookings'>,
-  nowIso: string = new Date().toISOString()
-): CustomerStatus {
-  const now = new Date(nowIso).getTime();
-  const createdDate = new Date(customer.createdAt).getTime();
-  const daysSinceCreation = (now - createdDate) / (1000 * 60 * 60 * 24);
+export interface CrmNote {
+  id: string;
+  content: string;
+  authorName: string;
+  authorRole: string;
+  createdAt: string;
+}
 
-  // 1. Check NEW condition
-  if (daysSinceCreation <= 30 && customer.totalBookings <= 1) {
+export interface CrmCustomer {
+  customerId: string;
+  businessId: string; // Tenant Isolation
+  name: string;
+  phone: string;
+  email: string;
+  dob?: string; // YYYY-MM-DD
+  gender?: string;
+  lastVisit?: string; // YYYY-MM-DD
+  nextBooking?: string; // YYYY-MM-DD
+  totalVisits: number;
+  totalSpendCents: number;
+  favoriteServices: string[];
+  tags: string[];
+  notes: any; // Can be string or CrmNote[] for backward compatibility
+  marketingConsent: boolean;
+  whatsappOptIn: boolean;
+  emailConsent: boolean;
+  smsConsent: boolean;
+
+  // Legacy fields
+  id: string;
+  tenantId: string;
+  status: string;
+  createdAt: string;
+  lastVisitAt?: string;
+  totalBookings: number;
+  completedBookings: number;
+  cancelledBookings: number;
+  noShowBookings: number;
+  avatar?: string;
+  totalSpend: number; // legacy getter fallback
+  dateOfBirth?: string; // legacy dob fallback
+}
+
+export type CustomerProfile = CrmCustomer; // legacy alias
+
+export interface TimelineEvent {
+  eventId: string;
+  customerId: string;
+  type: 'BOOKING' | 'PAYMENT' | 'VISIT' | 'REVIEW' | 'OFFER_SENT' | 'OFFER_REDEEMED' | 'MESSAGE_SENT' | 'CUSTOMER_CREATED' | 'BOOKING_CREATED' | 'BOOKING_CONFIRMED' | 'VISIT_COMPLETED' | 'BOOKING_CANCELLED';
+  timestamp: string;
+  title: string;
+  description: string;
+  // legacy alias
+  id?: string;
+}
+
+export function calculateCustomerStatus(customer: any, referenceDateIso?: string): string {
+  const refDate = referenceDateIso ? new Date(referenceDateIso) : new Date();
+  
+  // Rule: NEW: Created within 30 days and <= 1 booking
+  const createdDate = new Date(customer.createdAt || new Date().toISOString());
+  const diffTime = Math.abs(refDate.getTime() - createdDate.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays <= 30 && (customer.totalBookings ?? 0) <= 1) {
     return 'NEW';
   }
 
-  // 2. Check ACTIVE condition based on last visit date
+  // Rule: INACTIVE: Last visit older than 90 days
   if (customer.lastVisitAt) {
-    const lastVisitDate = new Date(customer.lastVisitAt).getTime();
-    const daysSinceLastVisit = (now - lastVisitDate) / (1000 * 60 * 60 * 24);
-    if (daysSinceLastVisit <= 90 && customer.completedBookings > 0) {
-      return 'ACTIVE';
+    const lastVisitDate = new Date(customer.lastVisitAt);
+    const lastVisitDiff = Math.abs(refDate.getTime() - lastVisitDate.getTime());
+    const lastVisitDays = Math.ceil(lastVisitDiff / (1000 * 60 * 60 * 24));
+    if (lastVisitDays > 90) {
+      return 'INACTIVE';
     }
   }
 
-  // If created recently but has completed bookings
-  if (daysSinceCreation <= 90 && customer.completedBookings > 0) {
-    return 'ACTIVE';
-  }
-
-  // 3. Fallback to INACTIVE
-  return 'INACTIVE';
+  return 'ACTIVE';
 }
+export const calculateCustomerStatusRule = calculateCustomerStatus;

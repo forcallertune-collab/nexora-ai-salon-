@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
 import { TopBar } from './components/TopBar';
 import { AuthProvider } from './services/authContext';
+import { Phase612HardeningShowcase } from './components/Phase612HardeningShowcase';
+import { Phase611AiGrowthShowcase } from './components/Phase611AiGrowthShowcase';
+import { Phase610AutomationsShowcase } from './components/Phase610AutomationsShowcase';
+import { Phase69OffersShowcase } from './components/Phase69OffersShowcase';
+import { Phase68CrmShowcase } from './components/Phase68CrmShowcase';
+import { Phase67NetworkDirectoryShowcase } from './components/Phase67NetworkDirectoryShowcase';
+import { Phase66WalletShowcase } from './components/Phase66WalletShowcase';
+import { Phase65WithdrawalShowcase } from './components/Phase65WithdrawalShowcase';
+import { Phase64CommissionLedgerShowcase } from './components/Phase64CommissionLedgerShowcase';
+import { Phase63CollectionSplitShowcase } from './components/Phase63CollectionSplitShowcase';
+import { Phase62NexoraQrShowcase } from './components/Phase62NexoraQrShowcase';
+import { Phase61PaymentShowcase } from './components/Phase61PaymentShowcase';
 import { Phase510SecurityDeliverablesShowcase } from './components/Phase510SecurityDeliverablesShowcase';
 import { Phase59OperationalDashboardShowcase } from './components/Phase59OperationalDashboardShowcase';
 import { Phase58CommunicationShowcase } from './components/Phase58CommunicationShowcase';
@@ -50,7 +62,7 @@ import { ArchitectureDocumentSummary } from './components/ArchitectureDocumentSu
 import { LayoutGrid, Layers, ShieldCheck, Compass, FileText, BookOpen, Sparkles, Layout, Clock, UserCheck, LayoutDashboard, SlidersHorizontal, ShieldAlert, Cpu, Palette, Route, Boxes, Globe, Lock, Sliders, CalendarCheck2, Scissors, CalendarRange, Clock3 } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<string>('phase510-security');
+  const [activeTab, setActiveTab] = useState<string>('phase612-hardening');
   const [wireframeCategory, setWireframeCategory] = useState<string>('barber');
 
   return (
@@ -64,27 +76,39 @@ export default function App() {
           setWireframeCategory={setWireframeCategory}
         />
 
-        {/* Phase 5.10 Status Banner */}
+        {/* Phase 6.12 Status Banner */}
         <div className="bg-slate-950 text-white text-xs border-b border-slate-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="font-semibold tracking-wide uppercase text-[11px] text-emerald-300">
-                Strict Execution Mode: Phase 5.10 — Operations Security & Hardening
+                Strict Execution Mode: Phase 6.12 — Financial Reconciliation & Security
               </span>
               <span className="text-slate-400">·</span>
               <span className="text-slate-300">
-                Role Matrix · Backend RBAC Authorization · Tenant Isolation · Audit Logs · Comprehensive Test Suites (1-27)
+                Penny-Matched Balancing · Webhook HMAC Keys · Double-Withdrawal Guards · Consent Leaks Block
               </span>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-emerald-400 font-mono font-bold">
-              <span>PHASE 5 COMPLETE</span>
+              <span>PHASE 6.12 COMPLETE</span>
             </div>
           </div>
         </div>
 
         {/* Main Content Area */}
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {activeTab === 'phase612-hardening' && <Phase612HardeningShowcase />}
+          {activeTab === 'phase611-ai-growth' && <Phase611AiGrowthShowcase />}
+          {activeTab === 'phase610-automations' && <Phase610AutomationsShowcase />}
+          {activeTab === 'phase69-offers' && <Phase69OffersShowcase />}
+          {activeTab === 'phase68-crm' && <Phase68CrmShowcase />}
+          {activeTab === 'phase67-rewards' && <Phase67NetworkDirectoryShowcase />}
+          {activeTab === 'phase66-wallet' && <Phase66WalletShowcase />}
+          {activeTab === 'phase65-withdrawal' && <Phase65WithdrawalShowcase />}
+          {activeTab === 'phase64-ledger' && <Phase64CommissionLedgerShowcase />}
+          {activeTab === 'phase63-split' && <Phase63CollectionSplitShowcase />}
+          {activeTab === 'phase62-nexora-qr' && <Phase62NexoraQrShowcase />}
+          {activeTab === 'phase61-payment' && <Phase61PaymentShowcase />}
           {activeTab === 'phase510-security' && <Phase510SecurityDeliverablesShowcase />}
           {activeTab === 'phase59-operational-dashboard' && <Phase59OperationalDashboardShowcase />}
           {activeTab === 'phase58-communication' && <Phase58CommunicationShowcase />}

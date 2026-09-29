@@ -661,7 +661,7 @@ export const Phase51CustomerCrmShowcase: React.FC = () => {
                   {selectedCustomer.notes.length === 0 ? (
                     <div className="text-slate-400 italic text-center py-4">No staff notes added yet.</div>
                   ) : (
-                    selectedCustomer.notes.map((n) => (
+                    selectedCustomer.notes.map((n: any) => (
                       <div key={n.id} className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
                         <div className="flex items-center justify-between text-[11px]">
                           <span className="font-bold text-slate-800">{n.authorName} ({n.authorRole})</span>
