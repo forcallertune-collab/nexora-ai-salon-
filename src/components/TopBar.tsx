@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, ShieldCheck, FileText, Compass, LayoutGrid, GitBranch, Sparkles, Layout, Clock, UserCheck, LayoutDashboard, SlidersHorizontal, ShieldAlert, Cpu, Palette, Route, Boxes, Globe, Lock, Sliders, CalendarCheck2, Scissors, CalendarRange, Clock3, UserCheck2, CreditCard, Bell, Users, History } from 'lucide-react';
+import { Layers, ShieldCheck, FileText, Compass, LayoutGrid, GitBranch, Sparkles, Layout, Clock, UserCheck, LayoutDashboard, SlidersHorizontal, ShieldAlert, Cpu, Palette, Route, Boxes, Globe, Lock, Sliders, CalendarCheck2, Scissors, CalendarRange, Clock3, UserCheck2, CreditCard, Bell, Users, History, Star } from 'lucide-react';
 
 interface TopBarProps {
   activeTab: string;
@@ -13,6 +13,12 @@ export const TopBar: React.FC<TopBarProps> = ({
   setActiveTab,
 }) => {
   const navItems = [
+    { id: 'phase510-security', label: 'Phase 5.10: Security & Deliverables Report', icon: ShieldCheck },
+    { id: 'phase59-operational-dashboard', label: 'Phase 5.9: Business Operational Dashboard', icon: LayoutDashboard },
+    { id: 'phase58-communication', label: 'Phase 5.8: Customer Communication', icon: Bell },
+    { id: 'phase57-reviews', label: 'Phase 5.7: Reviews & Ratings', icon: Star },
+    { id: 'phase56-daily-operations', label: 'Phase 5.6: Daily Appointment Operations', icon: Clock3 },
+    { id: 'phase55-staff-dashboard', label: 'Phase 5.5: Staff Dashboard', icon: UserCheck },
     { id: 'phase54-staff-availability', label: 'Phase 5.4: Staff Availability & Leave', icon: CalendarRange },
     { id: 'phase53-staff-management', label: 'Phase 5.3: Business Staff Management', icon: Users },
     { id: 'phase52-customer-profile', label: 'Phase 5.2: Customer Profile & History', icon: History },

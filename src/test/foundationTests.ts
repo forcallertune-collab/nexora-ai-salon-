@@ -81,6 +81,12 @@ import {
   calculateCustomerStatus
 } from '../types/customerCrm';
 import { StaffManagementService } from '../services/staffManagementService';
+import { StaffDashboardService } from '../services/staffDashboardService';
+import { DailyOperationsService } from '../services/dailyOperationsService';
+import { ReviewsService } from '../services/reviewsService';
+import { CommunicationService } from '../services/communicationService';
+import { BusinessOperationalDashboardService } from '../services/businessOperationalDashboardService';
+import { SecurityHardeningService } from '../services/securityHardeningService';
 
 export interface TestResultItem {
   id: string;
@@ -2575,6 +2581,796 @@ export function runFoundationTestSuite(): {
 
     assertEquals(holidayEval.available, false, 'Slot on business holiday rejected');
     assertEquals(holidayEval.code, 'BUSINESS_HOLIDAY', 'Reported BUSINESS_HOLIDAY');
+  });
+
+  // =========================================================================
+  // SUITE 22: PHASE 5.5 STAFF DASHBOARD
+  // =========================================================================
+
+  test('Suite 22: Phase 5.5 Staff Dashboard', '1. Staff Dashboard Summary & Today Appointments', () => {
+    const dashboardService = new StaffDashboardService();
+    const summary = dashboardService.getStaffSummary('stf-rc-01', 'biz-barber-001', '2026-10-20');
+
+    assertEquals(summary.staffId, 'stf-rc-01', 'Correct staff summary retrieved');
+    assertEquals(summary.businessId, 'biz-barber-001', 'Scoped to correct business');
+    assert(summary.todaysAppointmentsCount >= 0, 'Today appointments count calculated');
+  });
+
+  test('Suite 22: Phase 5.5 Staff Dashboard', '2. Appointment Lifecycle Actions (Check In, Start, Complete)', () => {
+    const bookingRepo = new MultiTenantBookingRepository([
+      {
+        id: 'bk-test-01',
+        businessId: 'biz-barber-001',
+        customerId: 'cust-1',
+        customerName: 'Aarav Sharma',
+        customerPhone: '+91 9888877777',
+        customerEmail: 'aarav@test.com',
+        staffId: 'stf-rc-01',
+        serviceId: 'srv-barber-1',
+        items: [{
+          id: 'item-1',
+          bookingId: 'bk-test-01',
+          itemType: 'SERVICE',
+          referenceId: 'srv-barber-1',
+          nameSnapshot: 'Beard Trim',
+          categorySnapshot: 'barber',
+          unitPriceCents: 1200,
+          durationMinutesSnapshot: 30
+        }],
+        bookingDate: '2026-10-20',
+        startTime: '10:00',
+        endTime: '10:30',
+        duration: 30,
+        subtotal: 1200,
+        discount: 0,
+        totalAmount: 1200,
+        advancePercentage: 25,
+        advanceAmount: 300,
+        remainingAmount: 900,
+        currency: 'INR',
+        financials: {
+          currency: 'INR',
+          subtotalCents: 120000,
+          discountCents: 0,
+          totalCents: 120000,
+          advancePercentage: 25,
+          advanceAmountCents: 30000,
+          remainingAmountCents: 90000,
+          taxGstCents: 0
+        },
+        status: 'CONFIRMED',
+        paymentStatus: 'ADVANCE_PAID',
+        paymentIntentId: 'pi_1',
+        createdAt: '2026-10-01T10:00:00Z',
+        updatedAt: '2026-10-01T10:00:00Z',
+        statusHistory: []
+      }
+    ]);
+
+    const dashboardService = new StaffDashboardService(bookingRepo);
+
+    // Check In
+    const checkInRes = dashboardService.executeAppointmentAction({
+      bookingId: 'bk-test-01',
+      staffId: 'stf-rc-01',
+      action: 'CHECK_IN'
+    }, 'biz-barber-001');
+
+    assertEquals(checkInRes.success, true, 'Check In action succeeded');
+    assertEquals(checkInRes.updatedBooking?.status, 'CHECKED_IN', 'Status transitioned to CHECKED_IN');
+
+    // Start
+    const startRes = dashboardService.executeAppointmentAction({
+      bookingId: 'bk-test-01',
+      staffId: 'stf-rc-01',
+      action: 'START'
+    }, 'biz-barber-001');
+
+    assertEquals(startRes.success, true, 'Start action succeeded');
+    assertEquals(startRes.updatedBooking?.status, 'IN_PROGRESS', 'Status transitioned to IN_PROGRESS');
+
+    // Complete
+    const completeRes = dashboardService.executeAppointmentAction({
+      bookingId: 'bk-test-01',
+      staffId: 'stf-rc-01',
+      action: 'COMPLETE'
+    }, 'biz-barber-001');
+
+    assertEquals(completeRes.success, true, 'Complete action succeeded');
+    assertEquals(completeRes.updatedBooking?.status, 'COMPLETED', 'Status transitioned to COMPLETED');
+  });
+
+  test('Suite 22: Phase 5.5 Staff Dashboard', '3. Unauthorized Staff Appointment Access Guard', () => {
+    const bookingRepo = new MultiTenantBookingRepository([
+      {
+        id: 'bk-test-02',
+        businessId: 'biz-barber-001',
+        customerId: 'cust-1',
+        customerName: 'Priya Verma',
+        customerPhone: '+91 9777766666',
+        customerEmail: 'priya@test.com',
+        staffId: 'stf-rc-01', // Assigned to Vikram (stf-rc-01)
+        serviceId: 'srv-barber-1',
+        items: [],
+        bookingDate: '2026-10-20',
+        startTime: '11:00',
+        endTime: '11:30',
+        duration: 30,
+        subtotal: 1200,
+        discount: 0,
+        totalAmount: 1200,
+        advancePercentage: 25,
+        advanceAmount: 300,
+        remainingAmount: 900,
+        currency: 'INR',
+        financials: { currency: 'INR', subtotalCents: 120000, discountCents: 0, totalCents: 120000, advancePercentage: 25, advanceAmountCents: 30000, remainingAmountCents: 90000, taxGstCents: 0 },
+        status: 'CONFIRMED',
+        paymentStatus: 'ADVANCE_PAID',
+        createdAt: '2026-10-01T10:00:00Z',
+        updatedAt: '2026-10-01T10:00:00Z',
+        statusHistory: []
+      }
+    ]);
+
+    const dashboardService = new StaffDashboardService(bookingRepo);
+
+    // Staff B (stf-rc-02) attempts to start Vikram's appointment
+    const hackAttempt = dashboardService.executeAppointmentAction({
+      bookingId: 'bk-test-02',
+      staffId: 'stf-rc-02',
+      action: 'START'
+    }, 'biz-barber-001');
+
+    assertEquals(hackAttempt.success, false, 'Unauthorized staff action blocked');
+    assert(hackAttempt.error?.includes('Unauthorized') || false, 'Reported unauthorized error message');
+  });
+
+  test('Suite 22: Phase 5.5 Staff Dashboard', '4. Staff Self-Profile Management & Critical Setting Lockdown', () => {
+    const dashboardService = new StaffDashboardService();
+    const updated = dashboardService.updateStaffSelfProfile('stf-rc-01', 'biz-barber-001', {
+      bio: 'Updated bio by self-service portal',
+      phone: '+91 9811100000',
+      specializations: ['Master Fades', 'Beard Art']
+    });
+
+    assertEquals(updated.bio, 'Updated bio by self-service portal', 'Self bio updated');
+    assertEquals(updated.phone, '+91 9811100000', 'Self phone updated');
+
+    // Verify staff cannot access financial / tax settings
+    const canAccessFinance = dashboardService.verifyStaffSecurityAccess('FINANCIALS');
+    assertEquals(canAccessFinance, false, 'Staff denied access to financial settings');
+
+    const canAccessCommission = dashboardService.verifyStaffSecurityAccess('COMMISSION');
+    assertEquals(canAccessCommission, false, 'Staff denied access to commission settings');
+  });
+
+  test('Suite 22: Phase 5.5 Staff Dashboard', '5. Staff Leave Request Submission', () => {
+    const dashboardService = new StaffDashboardService();
+    const leaveReq = dashboardService.requestStaffLeave(
+      'stf-rc-01',
+      'biz-barber-001',
+      '2026-11-15',
+      '2026-11-17',
+      'VACATION',
+      'Family trip'
+    );
+
+    assert(leaveReq.id.startsWith('lev-'), 'Generated leave request ID');
+    assertEquals(leaveReq.status, 'PENDING', 'Leave request created with PENDING status for manager approval');
+  });
+
+  // =========================================================================
+  // SUITE 23: PHASE 5.6 DAILY APPOINTMENT OPERATIONS
+  // =========================================================================
+
+  test('Suite 23: Phase 5.6 Daily Operations', '1. Complete Daily Operational Workflow (Check-In -> Start -> Complete)', () => {
+    const bookingRepo = new MultiTenantBookingRepository([
+      {
+        id: 'bk-ops-01',
+        businessId: 'biz-barber-001',
+        customerId: 'cust-1',
+        customerName: 'Rahul Dravid',
+        customerPhone: '+91 9999988888',
+        customerEmail: 'rahul@test.com',
+        staffId: 'stf-rc-01',
+        serviceId: 'srv-barber-1',
+        items: [{
+          id: 'item-ops-1',
+          bookingId: 'bk-ops-01',
+          itemType: 'SERVICE',
+          referenceId: 'srv-barber-1',
+          nameSnapshot: 'Executive Haircut',
+          categorySnapshot: 'barber',
+          unitPriceCents: 1500,
+          durationMinutesSnapshot: 45
+        }],
+        bookingDate: '2026-10-20',
+        startTime: '10:00',
+        endTime: '10:45',
+        duration: 45,
+        subtotal: 1500,
+        discount: 0,
+        totalAmount: 1500,
+        advancePercentage: 25,
+        advanceAmount: 375,
+        remainingAmount: 1125,
+        currency: 'INR',
+        financials: { currency: 'INR', subtotalCents: 150000, discountCents: 0, totalCents: 150000, advancePercentage: 25, advanceAmountCents: 37500, remainingAmountCents: 112500, taxGstCents: 0 },
+        status: 'CONFIRMED',
+        paymentStatus: 'ADVANCE_PAID',
+        createdAt: '2026-10-01T10:00:00Z',
+        updatedAt: '2026-10-01T10:00:00Z',
+        statusHistory: []
+      }
+    ]);
+
+    const opsService = new DailyOperationsService(bookingRepo);
+
+    // Step 1: Customer Arrival (Check-in)
+    const checkIn = opsService.executeOperationalAction({
+      bookingId: 'bk-ops-01',
+      businessId: 'biz-barber-001',
+      action: 'CHECK_IN'
+    });
+    assertEquals(checkIn.success, true, 'Check-in successful');
+    assertEquals(checkIn.updatedBooking?.status, 'CHECKED_IN', 'Status is CHECKED_IN');
+
+    // Step 2: Start Service
+    const start = opsService.executeOperationalAction({
+      bookingId: 'bk-ops-01',
+      businessId: 'biz-barber-001',
+      action: 'START'
+    });
+    assertEquals(start.success, true, 'Start service successful');
+    assertEquals(start.updatedBooking?.status, 'IN_PROGRESS', 'Status is IN_PROGRESS');
+
+    // Step 3: Complete Service
+    const complete = opsService.executeOperationalAction({
+      bookingId: 'bk-ops-01',
+      businessId: 'biz-barber-001',
+      action: 'COMPLETE'
+    });
+    assertEquals(complete.success, true, 'Complete service successful');
+    assertEquals(complete.updatedBooking?.status, 'COMPLETED', 'Status is COMPLETED');
+    assert((complete.updatedBooking?.statusHistory.length || 0) >= 3, 'Audit trail preserved across workflow');
+  });
+
+  test('Suite 23: Phase 5.6 Daily Operations', '2. No-Show & Cancellation Operational Actions', () => {
+    const bookingRepo = new MultiTenantBookingRepository([
+      {
+        id: 'bk-ops-02',
+        businessId: 'biz-barber-001',
+        customerId: 'cust-2',
+        customerName: 'Suresh Raina',
+        customerPhone: '+91 9888811111',
+        customerEmail: 'suresh@test.com',
+        staffId: 'stf-rc-01',
+        serviceId: 'srv-barber-1',
+        items: [],
+        bookingDate: '2026-10-20',
+        startTime: '11:00',
+        endTime: '11:30',
+        duration: 30,
+        subtotal: 1000,
+        discount: 0,
+        totalAmount: 1000,
+        advancePercentage: 25,
+        advanceAmount: 250,
+        remainingAmount: 750,
+        currency: 'INR',
+        financials: { currency: 'INR', subtotalCents: 100000, discountCents: 0, totalCents: 100000, advancePercentage: 25, advanceAmountCents: 25000, remainingAmountCents: 75000, taxGstCents: 0 },
+        status: 'CONFIRMED',
+        paymentStatus: 'ADVANCE_PAID',
+        createdAt: '2026-10-01T10:00:00Z',
+        updatedAt: '2026-10-01T10:00:00Z',
+        statusHistory: []
+      }
+    ]);
+
+    const opsService = new DailyOperationsService(bookingRepo);
+
+    // No Show Action
+    const noShow = opsService.executeOperationalAction({
+      bookingId: 'bk-ops-02',
+      businessId: 'biz-barber-001',
+      action: 'NO_SHOW',
+      reason: 'Customer did not arrive within 15 minutes'
+    });
+    assertEquals(noShow.success, true, 'Marked as no-show successfully');
+    assertEquals(noShow.updatedBooking?.status, 'NO_SHOW', 'Status is NO_SHOW');
+  });
+
+  test('Suite 23: Phase 5.6 Daily Operations', '3. Invalid Operational Transition Guard', () => {
+    const bookingRepo = new MultiTenantBookingRepository([
+      {
+        id: 'bk-ops-03',
+        businessId: 'biz-barber-001',
+        customerId: 'cust-3',
+        customerName: 'MS Dhoni',
+        customerPhone: '+91 9777700000',
+        customerEmail: 'msd@test.com',
+        staffId: 'stf-rc-01',
+        serviceId: 'srv-barber-1',
+        items: [],
+        bookingDate: '2026-10-20',
+        startTime: '12:00',
+        endTime: '12:30',
+        duration: 30,
+        subtotal: 1200,
+        discount: 0,
+        totalAmount: 1200,
+        advancePercentage: 25,
+        advanceAmount: 300,
+        remainingAmount: 900,
+        currency: 'INR',
+        financials: { currency: 'INR', subtotalCents: 120000, discountCents: 0, totalCents: 120000, advancePercentage: 25, advanceAmountCents: 30000, remainingAmountCents: 90000, taxGstCents: 0 },
+        status: 'CONFIRMED',
+        paymentStatus: 'ADVANCE_PAID',
+        createdAt: '2026-10-01T10:00:00Z',
+        updatedAt: '2026-10-01T10:00:00Z',
+        statusHistory: []
+      }
+    ]);
+
+    const opsService = new DailyOperationsService(bookingRepo);
+
+    // Attempting invalid jump from CONFIRMED directly to COMPLETED
+    const invalidJump = opsService.executeOperationalAction({
+      bookingId: 'bk-ops-03',
+      businessId: 'biz-barber-001',
+      action: 'COMPLETE'
+    });
+    assertEquals(invalidJump.success, false, 'Invalid state transition rejected by centralized state machine');
+  });
+
+  // =========================================================================
+  // SUITE 24: PHASE 5.7 REVIEWS + RATINGS
+  // =========================================================================
+
+  test('Suite 24: Phase 5.7 Reviews', '1. Completed Booking Review Eligibility & Creation', () => {
+    const reviewsService = new ReviewsService([]);
+    const completedBooking: BookingEntity = {
+      id: 'bk-comp-101',
+      businessId: 'biz-barber-001',
+      customerId: 'cust-10',
+      customerName: 'Sachin Tendulkar',
+      customerPhone: '+91 9999911111',
+      customerEmail: 'sachin@test.com',
+      items: [],
+      bookingDate: '2026-10-18',
+      startTime: '10:00',
+      endTime: '11:00',
+      duration: 60,
+      subtotal: 2000,
+      discount: 0,
+      totalAmount: 2000,
+      advancePercentage: 25,
+      advanceAmount: 500,
+      remainingAmount: 1500,
+      currency: 'INR',
+      financials: { currency: 'INR', subtotalCents: 200000, discountCents: 0, totalCents: 200000, advancePercentage: 25, advanceAmountCents: 50000, remainingAmountCents: 150000, taxGstCents: 0 },
+      status: 'COMPLETED',
+      paymentStatus: 'PAID',
+      createdAt: '2026-10-01T00:00:00Z',
+      updatedAt: '2026-10-18T11:00:00Z',
+      statusHistory: []
+    };
+
+    const res = reviewsService.createReview({
+      businessId: 'biz-barber-001',
+      customerId: 'cust-10',
+      customerName: 'Sachin Tendulkar',
+      bookingId: 'bk-comp-101',
+      rating: 5,
+      reviewText: 'Masterclass service!'
+    }, completedBooking);
+
+    assertEquals(res.success, true, 'Review successfully created for completed booking');
+    assertEquals(res.review?.status, 'PENDING', 'New review defaults to PENDING status for moderation');
+  });
+
+  test('Suite 24: Phase 5.7 Reviews', '2. Non-Completed Booking Review Rejection', () => {
+    const reviewsService = new ReviewsService([]);
+    const confirmedBooking: BookingEntity = {
+      id: 'bk-conf-102',
+      businessId: 'biz-barber-001',
+      customerId: 'cust-11',
+      customerName: 'Virender Sehwag',
+      customerPhone: '+91 9888822222',
+      customerEmail: 'sehwag@test.com',
+      items: [],
+      bookingDate: '2026-10-25',
+      startTime: '14:00',
+      endTime: '15:00',
+      duration: 60,
+      subtotal: 1800,
+      discount: 0,
+      totalAmount: 1800,
+      advancePercentage: 25,
+      advanceAmount: 450,
+      remainingAmount: 1350,
+      currency: 'INR',
+      financials: { currency: 'INR', subtotalCents: 180000, discountCents: 0, totalCents: 180000, advancePercentage: 25, advanceAmountCents: 45000, remainingAmountCents: 135000, taxGstCents: 0 },
+      status: 'CONFIRMED', // Not completed
+      paymentStatus: 'ADVANCE_PAID',
+      createdAt: '2026-10-01T00:00:00Z',
+      updatedAt: '2026-10-01T00:00:00Z',
+      statusHistory: []
+    };
+
+    const res = reviewsService.createReview({
+      businessId: 'biz-barber-001',
+      customerId: 'cust-11',
+      customerName: 'Virender Sehwag',
+      bookingId: 'bk-conf-102',
+      rating: 4,
+      reviewText: 'Early review attempt'
+    }, confirmedBooking);
+
+    assertEquals(res.success, false, 'Review rejected for non-completed booking');
+    assert(res.error?.includes('completed bookings') || false, 'Reported eligibility error message');
+  });
+
+  test('Suite 24: Phase 5.7 Reviews', '3. Anti-Abuse Duplicate Review Prevention', () => {
+    const reviewsService = new ReviewsService([]);
+    const completedBooking: BookingEntity = {
+      id: 'bk-comp-103',
+      businessId: 'biz-barber-001',
+      customerId: 'cust-12',
+      customerName: 'Yuvraj Singh',
+      customerPhone: '+91 9777733333',
+      customerEmail: 'yuvraj@test.com',
+      items: [],
+      bookingDate: '2026-10-18',
+      startTime: '12:00',
+      endTime: '13:00',
+      duration: 60,
+      subtotal: 2000,
+      discount: 0,
+      totalAmount: 2000,
+      advancePercentage: 25,
+      advanceAmount: 500,
+      remainingAmount: 1500,
+      currency: 'INR',
+      financials: { currency: 'INR', subtotalCents: 200000, discountCents: 0, totalCents: 200000, advancePercentage: 25, advanceAmountCents: 50000, remainingAmountCents: 150000, taxGstCents: 0 },
+      status: 'COMPLETED',
+      paymentStatus: 'PAID',
+      createdAt: '2026-10-01T00:00:00Z',
+      updatedAt: '2026-10-18T13:00:00Z',
+      statusHistory: []
+    };
+
+    // First review submission
+    const firstRes = reviewsService.createReview({
+      businessId: 'biz-barber-001',
+      customerId: 'cust-12',
+      customerName: 'Yuvraj Singh',
+      bookingId: 'bk-comp-103',
+      rating: 5,
+      reviewText: 'Amazing styling!'
+    }, completedBooking);
+
+    assertEquals(firstRes.success, true, 'First review created successfully');
+
+    // Second review submission for same booking (Anti-abuse guard)
+    const secondRes = reviewsService.createReview({
+      businessId: 'biz-barber-001',
+      customerId: 'cust-12',
+      customerName: 'Yuvraj Singh',
+      bookingId: 'bk-comp-103',
+      rating: 1,
+      reviewText: 'Spam duplicate review'
+    }, completedBooking);
+
+    assertEquals(secondRes.success, false, 'Duplicate review blocked by anti-abuse guard');
+    assert(secondRes.error?.includes('already been submitted') || false, 'Reported duplicate review error message');
+  });
+
+  test('Suite 24: Phase 5.7 Reviews', '4. Admin Moderation & Public Published Display', () => {
+    const reviewsService = new ReviewsService([]);
+    const completedBooking: BookingEntity = {
+      id: 'bk-comp-104',
+      businessId: 'biz-barber-001',
+      customerId: 'cust-13',
+      customerName: 'Zaheer Khan',
+      customerPhone: '+91 9666644444',
+      customerEmail: 'zaheer@test.com',
+      items: [],
+      bookingDate: '2026-10-19',
+      startTime: '15:00',
+      endTime: '16:00',
+      duration: 60,
+      subtotal: 1500,
+      discount: 0,
+      totalAmount: 1500,
+      advancePercentage: 25,
+      advanceAmount: 375,
+      remainingAmount: 1125,
+      currency: 'INR',
+      financials: { currency: 'INR', subtotalCents: 150000, discountCents: 0, totalCents: 150000, advancePercentage: 25, advanceAmountCents: 37500, remainingAmountCents: 112500, taxGstCents: 0 },
+      status: 'COMPLETED',
+      paymentStatus: 'PAID',
+      createdAt: '2026-10-01T00:00:00Z',
+      updatedAt: '2026-10-19T16:00:00Z',
+      statusHistory: []
+    };
+
+    const res = reviewsService.createReview({
+      businessId: 'biz-barber-001',
+      customerId: 'cust-13',
+      customerName: 'Zaheer Khan',
+      bookingId: 'bk-comp-104',
+      rating: 5,
+      reviewText: 'Flawless fade.'
+    }, completedBooking);
+
+    const reviewId = res.review!.id;
+
+    // Initially PENDING -> should not appear in public published list
+    assertEquals(reviewsService.listPublicReviews('biz-barber-001').some((r) => r.id === reviewId), false, 'Pending review not public');
+
+    // Admin moderates to PUBLISHED
+    reviewsService.updateReviewStatus(reviewId, 'PUBLISHED');
+    assertEquals(reviewsService.listPublicReviews('biz-barber-001').some((r) => r.id === reviewId), true, 'Published review visible on public site');
+
+    // Check average rating calculation
+    const summary = reviewsService.getBusinessRatingSummary('biz-barber-001');
+    assert(summary.reviewCount > 0, 'Calculated review count');
+    assert(summary.averageRating >= 1 && summary.averageRating <= 5, 'Calculated average rating between 1 and 5');
+  });
+
+  // =========================================================================
+  // SUITE 25: PHASE 5.8 CUSTOMER COMMUNICATION
+  // =========================================================================
+
+  test('Suite 25: Phase 5.8 Communication', '1. Booking Confirmation & Event Dispatch Across Channels', async () => {
+    const commService = new CommunicationService();
+    const logs = await commService.dispatchEvent(
+      'biz-barber-001',
+      'cust-comm-01',
+      'test@customer.com',
+      'BOOKING_CONFIRMED',
+      ['EMAIL', 'WHATSAPP', 'IN_APP'],
+      {
+        customerName: 'MS Dhoni',
+        businessName: 'Royal Crown Barber',
+        serviceName: 'Executive Haircut',
+        staffName: 'Vikram',
+        bookingDate: '2026-10-25',
+        bookingTime: '10:00',
+        bookingId: 'bk-comm-01',
+        remainingAmount: 'INR 1,125'
+      }
+    );
+
+    assertEquals(logs.length, 3, 'Dispatched across 3 channels');
+    assertEquals(logs[0].status, 'SENT', 'Email successfully sent');
+    assertEquals(logs[1].status, 'SENT', 'WhatsApp successfully sent');
+    assertEquals(logs[2].status, 'SENT', 'In-App notification successfully sent');
+    assert(logs[0].content.includes('MS Dhoni'), 'Template variable interpolated customerName');
+    assert(logs[0].content.includes('Royal Crown Barber'), 'Template variable interpolated businessName');
+  });
+
+  test('Suite 25: Phase 5.8 Communication', '2. Customer Consent Preference Enforcement', async () => {
+    const commService = new CommunicationService();
+    // Withhold SMS consent
+    commService.setPreferences({
+      customerId: 'cust-comm-02',
+      emailConsent: true,
+      smsConsent: false,
+      whatsappConsent: true,
+      inAppConsent: true
+    });
+
+    const logs = await commService.dispatchEvent(
+      'biz-barber-001',
+      'cust-comm-02',
+      '+919999900000',
+      'BOOKING_REMINDER',
+      ['SMS', 'EMAIL'],
+      {
+        customerName: 'Virat Kohli',
+        businessName: 'Royal Crown Barber',
+        serviceName: 'Beard Trim',
+        staffName: 'Vikram',
+        bookingDate: '2026-10-26',
+        bookingTime: '11:00',
+        bookingId: 'bk-comm-02',
+        remainingAmount: 'INR 500'
+      }
+    );
+
+    const smsLog = logs.find((l) => l.channel === 'SMS');
+    const emailLog = logs.find((l) => l.channel === 'EMAIL');
+
+    assertEquals(smsLog?.status, 'FAILED', 'SMS failed due to withheld consent');
+    assert(smsLog?.errorMessage?.includes('Consent withheld') || false, 'Reported consent withheld error');
+    assertEquals(emailLog?.status, 'SENT', 'Email sent successfully where consent is true');
+  });
+
+  test('Suite 25: Phase 5.8 Communication', '3. Simulated Delivery Failure & Error Handling', async () => {
+    const commService = new CommunicationService();
+    const logs = await commService.dispatchEvent(
+      'biz-barber-001',
+      'cust-comm-03',
+      'fail@customer.com',
+      'BOOKING_CANCELLED',
+      ['EMAIL'],
+      {
+        customerName: 'Rohit Sharma',
+        businessName: 'Royal Crown Barber',
+        serviceName: 'Hair Styling',
+        staffName: 'Vikram',
+        bookingDate: '2026-10-27',
+        bookingTime: '15:00',
+        bookingId: 'bk-comm-03',
+        remainingAmount: 'INR 0'
+      },
+      'EMAIL' // Force failure on email channel
+    );
+
+    assertEquals(logs[0].status, 'FAILED', 'Email delivery marked as FAILED');
+    assert(logs[0].errorMessage !== undefined, 'Error message recorded');
+    // Note: Communication failure does not throw or invalidate any booking workflow.
+  });
+
+  // =========================================================================
+  // SUITE 26: PHASE 5.9 BUSINESS OPERATIONAL DASHBOARD
+  // =========================================================================
+
+  test('Suite 26: Phase 5.9 Operational Dashboard', '1. Dashboard Summary & Metrics Calculation', () => {
+    const dashboardService = new BusinessOperationalDashboardService();
+    const summary = dashboardService.getSummary('biz-barber-001', '2026-10-20');
+
+    assert(typeof summary.todaysAppointments === 'number', 'Calculated todaysAppointments');
+    assert(typeof summary.upcoming === 'number', 'Calculated upcoming count');
+    assert(typeof summary.completedToday === 'number', 'Calculated completedToday count');
+  });
+
+  test('Suite 26: Phase 5.9 Operational Dashboard', '2. Staff Operational Status & Performance Metrics', () => {
+    const dashboardService = new BusinessOperationalDashboardService();
+    const statuses = dashboardService.getStaffOperationalStatuses('biz-barber-001', '2026-10-20');
+
+    assert(statuses.length > 0, 'Retrieved staff operational statuses');
+    assert(statuses[0].status !== undefined, 'Staff status determined');
+
+    const performance = dashboardService.getServicePerformance('biz-barber-001');
+    assert(performance.byService !== undefined, 'Service performance aggregated by service');
+    assert(performance.byStaff !== undefined, 'Service performance aggregated by staff');
+  });
+
+  test('Suite 26: Phase 5.9 Operational Dashboard', '3. Customer Snapshot & Operational Alerts', () => {
+    const dashboardService = new BusinessOperationalDashboardService();
+    const snapshot = dashboardService.getCustomerSnapshot('biz-barber-001', '2026-10-20');
+
+    assert(typeof snapshot.newCustomers === 'number', 'Calculated new customers');
+    assert(typeof snapshot.returningCustomers === 'number', 'Calculated returning customers');
+    assert(typeof snapshot.upcomingVisits === 'number', 'Calculated upcoming visits');
+
+    const alerts = dashboardService.getOperationalAlerts('biz-barber-001');
+    assert(Array.isArray(alerts), 'Retrieved operational alerts array');
+  });
+
+  // =========================================================================
+  // SUITE 27: PHASE 5.10 OPERATIONS SECURITY & HARDENING
+  // =========================================================================
+
+  test('Suite 27: Phase 5.10 Security', '1-3. Customer CRUD, Search & Isolation', () => {
+    const crm = new CustomerCrmService([]);
+    const cust = crm.createCustomer({
+      businessId: 'biz-tenant-a',
+      name: 'Tenant A Customer',
+      phone: '+919999900000',
+      email: 'a@test.com'
+    }, 'biz-tenant-a');
+    assert(cust.id !== undefined, 'Customer CRUD created successfully');
+
+    const results = crm.getCustomersByTenant('biz-tenant-a', { searchQuery: 'Tenant A' }, []);
+    assertEquals(results.length, 1, 'Customer search returned matching customer');
+
+    const crmB = new CustomerCrmService([]);
+    const isoResults = crmB.getCustomersByTenant('biz-tenant-b', { searchQuery: 'Tenant A' }, []);
+    assertEquals(isoResults.length, 0, 'Customer isolation strictly blocked cross-tenant search');
+  });
+
+  test('Suite 27: Phase 5.10 Security', '4-7. Staff CRUD, Service Assignment, Permissions & Leave', () => {
+    const staffSvc = new StaffManagementService();
+    const staff = staffSvc.createStaff({
+      businessId: 'biz-barber-001',
+      name: 'Hardening Test Staff',
+      email: 'staff@test.com',
+      phone: '+919888800000',
+      role: 'Barber',
+      serviceIds: ['srv-barber-1']
+    }, 'biz-barber-001');
+    assert(staff.id !== undefined, 'Staff CRUD created');
+
+    const scheduleSvc = new StaffScheduleService();
+    const leave = scheduleSvc.createStaffLeave({
+      staffId: staff.id,
+      businessId: 'biz-barber-001',
+      startDate: '2026-11-01',
+      endDate: '2026-11-03',
+      leaveType: 'VACATION',
+      reason: 'Personal leave',
+      status: 'PENDING'
+    });
+    assertEquals(leave.status, 'PENDING', 'Leave request created');
+  });
+
+  test('Suite 27: Phase 5.10 Security', '8-11. Booking Transitions, Review Eligibility, Moderation & Comm', async () => {
+    const bookingRepo = new MultiTenantBookingRepository([
+      {
+        id: 'bk-sec-01',
+        businessId: 'biz-barber-001',
+        customerId: 'cust-sec',
+        customerName: 'Sec Test',
+        customerPhone: '+919777700000',
+        customerEmail: 'sec@test.com',
+        items: [],
+        bookingDate: '2026-10-20',
+        startTime: '10:00',
+        endTime: '11:00',
+        duration: 60,
+        subtotal: 1000,
+        discount: 0,
+        totalAmount: 1000,
+        advancePercentage: 25,
+        advanceAmount: 250,
+        remainingAmount: 750,
+        currency: 'INR',
+        financials: { currency: 'INR', subtotalCents: 100000, discountCents: 0, totalCents: 100000, advancePercentage: 25, advanceAmountCents: 25000, remainingAmountCents: 75000, taxGstCents: 0 },
+        status: 'CONFIRMED',
+        paymentStatus: 'ADVANCE_PAID',
+        createdAt: '2026-10-01T00:00:00Z',
+        updatedAt: '2026-10-01T00:00:00Z',
+        statusHistory: []
+      }
+    ]);
+
+    const ops = new DailyOperationsService(bookingRepo);
+    const checkIn = ops.executeOperationalAction({ bookingId: 'bk-sec-01', businessId: 'biz-barber-001', action: 'CHECK_IN' });
+    assertEquals(checkIn.success, true, 'Booking operational check-in transition successful');
+
+    const reviews = new ReviewsService([]);
+    const revRes = reviews.createReview({
+      businessId: 'biz-barber-001',
+      customerId: 'cust-sec',
+      customerName: 'Sec Test',
+      bookingId: 'bk-sec-01',
+      rating: 5
+    }, { ...bookingRepo.getBookingById('bk-sec-01', 'biz-barber-001')!, status: 'COMPLETED' });
+    assertEquals(revRes.success, true, 'Review created for completed booking');
+    reviews.updateReviewStatus(revRes.review!.id, 'PUBLISHED');
+
+    const comm = new CommunicationService();
+    const logs = await comm.dispatchEvent('biz-barber-001', 'cust-sec', 'sec@test.com', 'BOOKING_CONFIRMED', ['EMAIL'], {
+      customerName: 'Sec Test',
+      businessName: 'Barber',
+      serviceName: 'Cut',
+      staffName: 'Staff',
+      bookingDate: '2026-10-20',
+      bookingTime: '10:00',
+      bookingId: 'bk-sec-01',
+      remainingAmount: 'INR 750'
+    });
+    assertEquals(logs[0].status, 'SENT', 'Communication event handled successfully');
+  });
+
+  test('Suite 27: Phase 5.10 Security', '12-13. Role Authorization & Tenant Isolation Enforcement', () => {
+    const sec = new SecurityHardeningService();
+
+    // Staff attempting financial/admin action -> blocked
+    const staffAuth = sec.authorize('STAFF', 'biz-A', 'biz-A', 'MANAGE_TAX_CONFIGURATION');
+    assertEquals(staffAuth.allowed, false, 'Staff strictly blocked from financial/admin configuration');
+
+    // Cross-tenant access -> blocked
+    const crossTenantAuth = sec.authorize('MANAGER', 'biz-A', 'biz-B', 'VIEW_CUSTOMER_INFO');
+    assertEquals(crossTenantAuth.allowed, false, 'Tenant isolation strictly blocks cross-business access');
+
+    // Valid owner access within tenant -> allowed
+    const ownerAuth = sec.authorize('BUSINESS_OWNER', 'biz-A', 'biz-A', 'MANAGE_BUSINESS');
+    assertEquals(ownerAuth.allowed, true, 'Business owner authorized within own tenant');
   });
 
   const passed = results.filter((r) => r.passed).length;

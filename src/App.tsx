@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { TopBar } from './components/TopBar';
 import { AuthProvider } from './services/authContext';
+import { Phase510SecurityDeliverablesShowcase } from './components/Phase510SecurityDeliverablesShowcase';
+import { Phase59OperationalDashboardShowcase } from './components/Phase59OperationalDashboardShowcase';
+import { Phase58CommunicationShowcase } from './components/Phase58CommunicationShowcase';
+import { Phase57ReviewsShowcase } from './components/Phase57ReviewsShowcase';
+import { Phase56DailyOperationsShowcase } from './components/Phase56DailyOperationsShowcase';
+import { Phase55StaffDashboardShowcase } from './components/Phase55StaffDashboardShowcase';
 import { Phase54StaffAvailabilityShowcase } from './components/Phase54StaffAvailabilityShowcase';
 import { Phase53StaffManagementShowcase } from './components/Phase53StaffManagementShowcase';
 import { Phase52CustomerProfileHistoryShowcase } from './components/Phase52CustomerProfileHistoryShowcase';
@@ -44,7 +50,7 @@ import { ArchitectureDocumentSummary } from './components/ArchitectureDocumentSu
 import { LayoutGrid, Layers, ShieldCheck, Compass, FileText, BookOpen, Sparkles, Layout, Clock, UserCheck, LayoutDashboard, SlidersHorizontal, ShieldAlert, Cpu, Palette, Route, Boxes, Globe, Lock, Sliders, CalendarCheck2, Scissors, CalendarRange, Clock3 } from 'lucide-react';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<string>('phase54-staff-availability');
+  const [activeTab, setActiveTab] = useState<string>('phase510-security');
   const [wireframeCategory, setWireframeCategory] = useState<string>('barber');
 
   return (
@@ -58,27 +64,33 @@ export default function App() {
           setWireframeCategory={setWireframeCategory}
         />
 
-        {/* Phase 5.4 Status Banner */}
+        {/* Phase 5.10 Status Banner */}
         <div className="bg-slate-950 text-white text-xs border-b border-slate-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="font-semibold tracking-wide uppercase text-[11px] text-emerald-300">
-                Strict Execution Mode: Phase 5.4 — Staff Availability & Leave Management UI
+                Strict Execution Mode: Phase 5.10 — Operations Security & Hardening
               </span>
               <span className="text-slate-400">·</span>
               <span className="text-slate-300">
-                Weekly Schedules · Multi-Breaks · Full & Partial Leaves · Business Holidays · Live Evaluator Preview
+                Role Matrix · Backend RBAC Authorization · Tenant Isolation · Audit Logs · Comprehensive Test Suites (1-27)
               </span>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-emerald-400 font-mono font-bold">
-              <span>PHASE 5.4 COMPLETE</span>
+              <span>PHASE 5 COMPLETE</span>
             </div>
           </div>
         </div>
 
         {/* Main Content Area */}
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {activeTab === 'phase510-security' && <Phase510SecurityDeliverablesShowcase />}
+          {activeTab === 'phase59-operational-dashboard' && <Phase59OperationalDashboardShowcase />}
+          {activeTab === 'phase58-communication' && <Phase58CommunicationShowcase />}
+          {activeTab === 'phase57-reviews' && <Phase57ReviewsShowcase />}
+          {activeTab === 'phase56-daily-operations' && <Phase56DailyOperationsShowcase />}
+          {activeTab === 'phase55-staff-dashboard' && <Phase55StaffDashboardShowcase />}
           {activeTab === 'phase54-staff-availability' && <Phase54StaffAvailabilityShowcase />}
           {activeTab === 'phase53-staff-management' && <Phase53StaffManagementShowcase />}
           {activeTab === 'phase52-customer-profile' && <Phase52CustomerProfileHistoryShowcase />}
