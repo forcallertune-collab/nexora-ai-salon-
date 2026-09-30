@@ -208,6 +208,7 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
     address: wizardState.address,
     postalCode: '400050',
     country: wizardState.country,
+    verificationStatus: 'pending',
     config: {
       advancePaymentPercentage: 25,
       cancellationWindowHours: 4,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Users, Briefcase, Globe, TrendingUp, CreditCard, Settings, Menu, LogOut, FileText, CheckCircle, Star, Palette, Calendar } from 'lucide-react';
+import { LayoutDashboard, Users, Briefcase, Globe, TrendingUp, CreditCard, Settings, Menu, LogOut, FileText, CheckCircle, Star, Palette, Calendar, Layout } from 'lucide-react';
 
 export const SuperAdminShell: React.FC<{ children: React.ReactNode, activeId: string, onNavigate: (id: string) => void }> = ({ children, activeId, onNavigate }) => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -19,6 +19,7 @@ export const SuperAdminShell: React.FC<{ children: React.ReactNode, activeId: st
     ]},
     { label: 'Platform', items: [
       { id: 'sa-bookings', label: 'Bookings', icon: Calendar, path: '#' },
+      { id: 'sa-ads', label: 'Banner Ads', icon: Layout, path: '#' },
       { id: 'sa-transactions', label: 'Transactions', icon: CreditCard, path: '#' },
       { id: 'sa-commission', label: 'Commission', icon: CreditCard, path: '#' },
       { id: 'sa-withdrawals', label: 'Withdrawals', icon: CreditCard, path: '#' },

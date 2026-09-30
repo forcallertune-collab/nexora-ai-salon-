@@ -49,6 +49,16 @@ export type SettlementStatus =
   | 'failed';
 
 /**
+ * Business verification lifecycle
+ */
+export type VerificationStatus = 
+  | 'pending'
+  | 'under_review'
+  | 'verified'
+  | 'rejected'
+  | 'suspended';
+
+/**
  * Design system theme presets supported by template generator
  */
 export type ThemePreset =
@@ -111,6 +121,11 @@ export interface Business {
   templateId: string;
   themeId: string;
   status: 'active' | 'suspended' | 'pending_verification';
+  verificationStatus: VerificationStatus;
+  verificationNotes?: string;
+  verificationSubmittedAt?: string;
+  isFeatured?: boolean;
+  featuredUntil?: string;
   createdAt: string;
   updatedAt: string;
 }

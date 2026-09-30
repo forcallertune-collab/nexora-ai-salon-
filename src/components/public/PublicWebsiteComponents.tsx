@@ -38,6 +38,15 @@ export const PublicHero: React.FC<PublicComponentProps> = ({ business, templateD
           </div>
         )}
 
+        {business.verificationStatus === 'verified' && (
+          <div className="flex justify-center">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Nexora Verified Entity</span>
+            </div>
+          </div>
+        )}
+
         <Typography variant="display" className="tracking-tight font-black" style={{ color: theme.textColor, fontFamily: theme.fontFamilyHeading }}>
           {content?.title || business.name}
         </Typography>

@@ -38,6 +38,10 @@ export const SEEDED_PUBLIC_BUSINESSES: Record<string, BusinessSeedData> = {
     templateId: 'tmpl-barber-luxury',
     themeId: 'luxury',
     status: 'active',
+    verificationStatus: 'verified',
+    verificationSubmittedAt: '2025-01-15T09:00:00Z',
+    isFeatured: true,
+    featuredUntil: '2027-01-01T00:00:00Z',
     createdAt: '2025-01-12T10:00:00Z',
     updatedAt: '2026-09-29T12:00:00Z',
     staffMembers: [
@@ -86,6 +90,8 @@ export const SEEDED_PUBLIC_BUSINESSES: Record<string, BusinessSeedData> = {
     templateId: 'tmpl-spa-sanctuary',
     themeId: 'minimal',
     status: 'active',
+    verificationStatus: 'under_review',
+    verificationSubmittedAt: '2025-05-01T14:30:00Z',
     createdAt: '2025-04-28T10:00:00Z',
     updatedAt: '2026-09-29T12:00:00Z',
     staffMembers: [
@@ -132,6 +138,8 @@ export const SEEDED_PUBLIC_BUSINESSES: Record<string, BusinessSeedData> = {
     templateId: 'tmpl-nail-chic',
     themeId: 'elegant',
     status: 'active',
+    verificationStatus: 'verified',
+    verificationSubmittedAt: '2025-06-15T11:20:00Z',
     createdAt: '2025-06-10T10:00:00Z',
     updatedAt: '2026-09-29T12:00:00Z',
     staffMembers: [
@@ -178,6 +186,8 @@ export const SEEDED_PUBLIC_BUSINESSES: Record<string, BusinessSeedData> = {
     templateId: 'tmpl-tattoo-mono',
     themeId: 'bold',
     status: 'active',
+    verificationStatus: 'pending',
+    verificationSubmittedAt: '2025-05-20T16:45:00Z',
     createdAt: '2025-05-18T10:00:00Z',
     updatedAt: '2026-09-29T12:00:00Z',
     staffMembers: [

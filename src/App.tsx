@@ -12,6 +12,7 @@ import { ReviewsPage } from './components/admin/ReviewsPage';
 import { BusinessSettingsPage } from './components/admin/BusinessSettingsPage';
 import { WebsiteOverviewPage } from './components/admin/website/WebsiteOverviewPage';
 import { WebsiteEditorPage } from './components/admin/website/WebsiteEditorPage';
+import { DiscoveryPage } from './components/public/DiscoveryPage';
 import { SettingsPage } from './components/admin/settings/SettingsPage';
 import { BusinessAdminPlaceholder } from './components/BusinessAdminPlaceholder';
 
@@ -22,6 +23,9 @@ import { CategoryManagementPage } from './components/super_admin/catalog/Categor
 import { TemplateManagementPage } from './components/super_admin/catalog/TemplateManagementPage';
 import { ThemeManagementPage } from './components/super_admin/catalog/ThemeManagementPage';
 import { NetworkMembersPage } from './components/super_admin/businesses/NetworkMembersPage';
+import { VerificationManagementPage } from './components/super_admin/businesses/VerificationManagementPage';
+import { FeaturedManagementPage } from './components/super_admin/businesses/FeaturedManagementPage';
+import { AdsManagementPage } from './components/super_admin/platform/AdsManagementPage';
 
 export default function App() {
   const [activePage, setActivePage] = useState('dashboard');
@@ -40,6 +44,9 @@ export default function App() {
         case 'sa-dashboard': return <SuperAdminDashboard />;
         case 'sa-businesses': return <BusinessManagementPage />;
         case 'sa-network': return <NetworkMembersPage />;
+        case 'sa-verification': return <VerificationManagementPage />;
+        case 'sa-featured': return <FeaturedManagementPage />;
+        case 'sa-ads': return <AdsManagementPage />;
         case 'sa-categories': return <CategoryManagementPage />;
         case 'sa-templates': return <TemplateManagementPage />;
         case 'sa-themes': return <ThemeManagementPage />;
@@ -48,7 +55,8 @@ export default function App() {
     }
     
     switch (activePage) {
-      case 'dashboard': return <div className="p-4">Business Dashboard</div>;
+      case 'dashboard': return <DiscoveryPage onNavigate={handleNavigate} />;
+      case 'discovery': return <DiscoveryPage onNavigate={handleNavigate} />;
       case 'bookings': return <BookingsPage />;
       case 'customers': return <CustomersPage />;
       case 'staff': return <StaffPage onNavigate={handleNavigate} />;
