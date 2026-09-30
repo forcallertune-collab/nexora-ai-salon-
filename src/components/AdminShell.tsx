@@ -123,6 +123,13 @@ export const AdminShell: React.FC<{
           {navGroups.map((group, i) => (
             <NavGroupComponent key={i} group={group} activeId={activeId} onNavigate={onNavigate} />
           ))}
+          <button 
+            onClick={() => onNavigate('sa-dashboard')}
+            className="w-full mt-2 flex items-center gap-3 px-4 py-2.5 bg-slate-900 text-slate-100 rounded-lg text-sm font-bold hover:bg-indigo-600 transition-all shadow-lg"
+          >
+            <Settings className="w-5 h-5" />
+            Super Admin Access
+          </button>
           <button className="w-full mt-4 flex items-center gap-3 px-4 py-2.5 text-slate-600 hover:text-rose-600 transition-colors">
             <LogOut className="w-5 h-5" />
             Logout

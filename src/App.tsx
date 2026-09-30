@@ -21,6 +21,7 @@ import { BusinessManagementPage } from './components/super_admin/businesses/Busi
 import { CategoryManagementPage } from './components/super_admin/catalog/CategoryManagementPage';
 import { TemplateManagementPage } from './components/super_admin/catalog/TemplateManagementPage';
 import { ThemeManagementPage } from './components/super_admin/catalog/ThemeManagementPage';
+import { NetworkMembersPage } from './components/super_admin/businesses/NetworkMembersPage';
 
 export default function App() {
   const [activePage, setActivePage] = useState('dashboard');
@@ -38,6 +39,7 @@ export default function App() {
       switch (activePage) {
         case 'sa-dashboard': return <SuperAdminDashboard />;
         case 'sa-businesses': return <BusinessManagementPage />;
+        case 'sa-network': return <NetworkMembersPage />;
         case 'sa-categories': return <CategoryManagementPage />;
         case 'sa-templates': return <TemplateManagementPage />;
         case 'sa-themes': return <ThemeManagementPage />;
